@@ -11,7 +11,7 @@ class HomeScreen extends React.Component {
         super();
         this.state = {
             starshipsData: [],
-            refreshing: false
+            refreshing: true
         };
     }
 
@@ -20,8 +20,9 @@ class HomeScreen extends React.Component {
         //fetching starships data 
         fetchApi(ApiConstants.STARSHIP_ENDPOINT)
             .then((responseJson) => {
-                this.setState({ starshipsData: responseJson.results })
+                this.setState({ starshipsData: responseJson.results, refreshing: false})
             }).catch((error) => {
+                this.setState({ refreshing: false });
                 console.log(error)
             })
     }
