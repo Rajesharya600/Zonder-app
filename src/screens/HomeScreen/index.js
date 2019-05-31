@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, ScrollView } from 'react-native';
+import { Text, View, ScrollView, RefreshControl } from 'react-native';
 import styles from './styles';
 import StarShipTile from '../../components/StarShipTile'
 import { fetchApi } from '../../api'
@@ -10,17 +10,31 @@ class HomeScreen extends React.Component {
     constructor(props) {
         super();
         this.state = {
-            starshipsData: []
+            starshipsData: [],
+            refreshing: false
         };
     }
 
     componentDidMount() {
-        
+
         //fetching starships data 
         fetchApi(ApiConstants.STARSHIP_ENDPOINT)
             .then((responseJson) => {
-                this.setState({starshipsData: responseJson.results})
+                this.setState({ starshipsData: responseJson.results })
             }).catch((error) => {
+                console.log(error)
+            })
+    }
+
+    _onRefresh = () => {
+        this.setState({ refreshing: true });
+
+        //getting the starships data on refresh
+        fetchApi(ApiConstants.STARSHIP_ENDPOINT)
+            .then((responseJson) => {
+                this.setState({ starshipsData: responseJson.results, refreshing: false })
+            }).catch((error) => {
+                this.setState({ refreshing: false });
                 console.log(error)
             })
     }
@@ -32,7 +46,11 @@ class HomeScreen extends React.Component {
                 <View style={styles.header}>
                     <Text style={styles.headerText}>{AppConstants.STARSHIP_HEADER}</Text>
                 </View>
-                <ScrollView style={styles.scroll}>
+                <ScrollView refreshControl={
+                    <RefreshControl
+                        refreshing={this.state.refreshing}
+                        onRefresh={this._onRefresh}
+                    />} style={styles.scroll}>
                     <View style={styles.body}>
                         {
                             starshipsData.map((starship, index) => {
